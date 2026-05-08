@@ -14,7 +14,7 @@ class ProductionController:
     def complete_production(self) -> None:
         try:
             order = self._prod_svc.complete_production()
-            self._view.print_success(f"생산 완료: 주문 {order.id[:8]} → CONFIRMED")
+            self._view.print_success(f"생산 완료: 주문 {order.id} → CONFIRMED")
         except ValueError as e:
             self._view.print_error(str(e))
 
@@ -22,7 +22,7 @@ class ProductionController:
         order_id = self._view.prompt("출고할 주문 ID: ").strip()
         try:
             order = self._prod_svc.release(order_id)
-            self._view.print_success(f"출고 완료: {order.id[:8]} → RELEASE")
+            self._view.print_success(f"출고 완료: {order.id} → RELEASE")
         except ValueError as e:
             self._view.print_error(str(e))
 
@@ -33,6 +33,6 @@ class ProductionController:
             return
         self._view.print_table(
             ["주문ID", "시료ID", "고객명", "수량", "주문일시"],
-            [[o.id[:8], o.sample_id, o.customer_name, o.quantity,
+            [[o.id, o.sample_id, o.customer_name, o.quantity,
               o.created_at[:19]] for o in orders],
         )

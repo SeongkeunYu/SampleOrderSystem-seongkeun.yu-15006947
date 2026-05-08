@@ -15,7 +15,7 @@ class OrderService:
         if self._sample_repo.find_by_id(sample_id) is None:
             raise ValueError(f"존재하지 않는 시료: {sample_id}")
         order = Order(
-            id=str(uuid.uuid4()),
+            id=str(uuid.uuid4())[:8],
             sample_id=sample_id,
             customer_name=customer_name,
             quantity=quantity,

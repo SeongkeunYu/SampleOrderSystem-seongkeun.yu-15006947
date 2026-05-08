@@ -41,6 +41,6 @@ class OrderController:
             return
         self._view.print_table(
             ["주문ID", "시료ID", "고객명", "수량", "상태", "주문일시"],
-            [[o.id[:8], o.sample_id, o.customer_name, o.quantity,
+            [[o.id, o.sample_id, o.customer_name, o.quantity,
               o.status.value, o.created_at[:19]] for o in orders],
         )

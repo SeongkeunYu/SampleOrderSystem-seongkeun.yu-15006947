@@ -106,7 +106,7 @@ class ConsoleView:
                 for col in ["주문ID", "시료ID", "고객명", "수량"]:
                     t.add_column(col)
                 for o in group:
-                    t.add_row(o.id[:8], o.sample_id, o.customer_name, str(o.quantity))
+                    t.add_row(o.id, o.sample_id, o.customer_name, str(o.quantity))
                 self._con.print(t)
 
         # ── 생산 대기 큐 ──────────────────────────────────────
@@ -122,7 +122,7 @@ class ConsoleView:
             for col in ["순번", "주문ID", "시료ID", "고객명", "수량"]:
                 t.add_column(col)
             for i, o in enumerate(snapshot.production_queue):
-                t.add_row(str(i + 1), o.id[:8], o.sample_id,
+                t.add_row(str(i + 1), o.id, o.sample_id,
                           o.customer_name, str(o.quantity))
             self._con.print(t)
 
