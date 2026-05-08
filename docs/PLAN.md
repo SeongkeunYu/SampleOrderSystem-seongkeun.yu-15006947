@@ -41,8 +41,7 @@ SampleOrderSystem/
 │   ├── test_order_service.py
 │   └── test_production_service.py
 ├── tools/
-│   ├── monitor.py             # 실시간 데이터 조회 도구
-│   └── dummy_generator.py     # 테스트 데이터 생성 도구
+│   └── monitor.py             # 실시간 데이터 조회 도구
 └── requirements.txt
 ```
 
