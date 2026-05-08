@@ -12,15 +12,6 @@ class ProductionController:
         self._view = view
 
     def release(self) -> None:
-        self._show_confirmed_orders()
-        order_id = self._view.prompt("출고할 주문 ID: ").strip()
-        try:
-            order = self._prod_svc.release(order_id)
-            self._view.print_success(f"출고 완료: {order.id} → RELEASE")
-        except ValueError as e:
-            self._view.print_error(str(e))
-
-    def _show_confirmed_orders(self) -> None:
         orders = sorted(
             self._order_svc.find_by_status(OrderStatus.CONFIRMED),
             key=lambda o: o.created_at,
@@ -34,6 +25,12 @@ class ProductionController:
             [[o.id, o.sample_id, o.customer_name, o.quantity, o.created_at[:19]]
              for o in orders],
         )
+        order_id = self._view.prompt("출고할 주문 ID: ").strip()
+        try:
+            order = self._prod_svc.release(order_id)
+            self._view.print_success(f"출고 완료: {order.id} → RELEASE")
+        except ValueError as e:
+            self._view.print_error(str(e))
 
     def list_queue(self) -> None:
         progress = self._prod_svc.get_production_progress()

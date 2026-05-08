@@ -51,10 +51,9 @@ def test_release_shows_release_status(controller, sample_svc, order_svc, gan, mo
     assert "RELEASE" in capsys.readouterr().out
 
 
-def test_release_shows_error_on_invalid_order(controller, monkeypatch, capsys):
-    monkeypatch.setattr("builtins.input", lambda _: "NONE")
+def test_release_shows_message_when_no_confirmed_orders(controller, capsys):
     controller.release()
-    assert "오류" in capsys.readouterr().out
+    assert "없습니다" in capsys.readouterr().out
 
 
 def test_list_queue_shows_producing_orders(controller, order_svc, gan, capsys):
