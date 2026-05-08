@@ -30,24 +30,12 @@ class ProductionService:
             return []
 
         completed: list[Order] = []
-        prev_end: datetime | None = None
-
-        for order in producing:
-            sample = self._sample_repo.find_by_id(order.sample_id)
-            prod_qty = math.ceil(order.quantity / (sample.yield_rate * 0.9))
-            duration = timedelta(minutes=prod_qty * sample.avg_production_time)
-
-            start = max(datetime.fromisoformat(order.created_at), prev_end) \
-                if prev_end else datetime.fromisoformat(order.created_at)
-            end = start + duration
-            prev_end = end
-
+        for order, _sample, _prod_qty, _start, end in self._build_schedule(producing):
             if now >= end:
                 self._complete_order(order)
                 completed.append(order)
             else:
                 break  # FIFO: 이 주문이 미완이면 이후 주문도 시작 불가
-
         return completed
 
     def get_production_progress(self, now: datetime | None = None) -> list[dict]:
@@ -58,35 +46,25 @@ class ProductionService:
             key=lambda o: o.created_at,
         )
         result = []
-        prev_end: datetime | None = None
-
-        for i, order in enumerate(producing):
-            sample = self._sample_repo.find_by_id(order.sample_id)
-            prod_qty = math.ceil(order.quantity / (sample.yield_rate * 0.9))
-            duration = timedelta(minutes=prod_qty * sample.avg_production_time)
-
-            start = max(datetime.fromisoformat(order.created_at), prev_end) \
-                if prev_end else datetime.fromisoformat(order.created_at)
-            end = start + duration
-            prev_end = end
-
+        for i, (order, sample, prod_qty, start, end) in \
+                enumerate(self._build_schedule(producing)):
+            duration  = end - start
             is_active = (i == 0)
             if is_active:
-                elapsed = max(timedelta(0), now - start)
+                elapsed  = max(timedelta(0), now - start)
                 progress = min(100.0, elapsed.total_seconds() / duration.total_seconds() * 100)
             else:
                 progress = 0.0
 
             result.append({
-                "order": order,
+                "order":       order,
                 "sample_name": sample.name,
-                "prod_qty": prod_qty,
-                "start_time": start,
-                "end_time": end,
+                "prod_qty":    prod_qty,
+                "start_time":  start,
+                "end_time":    end,
                 "progress_pct": round(progress, 1),
-                "is_active": is_active,
+                "is_active":   is_active,
             })
-
         return result
 
     def release(self, order_id: str) -> Order:
@@ -97,8 +75,23 @@ class ProductionService:
         self._order_repo.save(order)
         return order
 
+    def _build_schedule(self, producing: list[Order]) -> list[tuple]:
+        """FIFO 순서로 (order, sample, prod_qty, start, end) 튜플 목록을 반환한다."""
+        result   = []
+        prev_end: datetime | None = None
+        for order in producing:
+            sample   = self._sample_repo.find_by_id(order.sample_id)
+            prod_qty = math.ceil(order.quantity / (sample.yield_rate * 0.9))
+            duration = timedelta(minutes=prod_qty * sample.avg_production_time)
+            start    = max(datetime.fromisoformat(order.created_at), prev_end) \
+                       if prev_end else datetime.fromisoformat(order.created_at)
+            end      = start + duration
+            prev_end = end
+            result.append((order, sample, prod_qty, start, end))
+        return result
+
     def _complete_order(self, order: Order) -> None:
-        sample = self._sample_repo.find_by_id(order.sample_id)
+        sample   = self._sample_repo.find_by_id(order.sample_id)
         shortage = max(0, order.quantity - sample.stock)
         if shortage > 0:
             produced = math.ceil(shortage / (sample.yield_rate * 0.9))

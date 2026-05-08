@@ -7,10 +7,6 @@ class MonitorController:
         self._monitor = monitor
         self._view    = view
 
-    def show_dashboard(self) -> None:
-        snapshot = self._monitor.get_snapshot()
-        self._view.print_monitor_dashboard(snapshot)
-
     def show_order_monitor(self) -> None:
         snapshot = self._monitor.get_snapshot()
         self._view.print_order_monitor(snapshot)

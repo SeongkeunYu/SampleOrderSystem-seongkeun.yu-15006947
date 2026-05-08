@@ -25,7 +25,15 @@ class OrderController:
             self._view.print_error(str(e))
 
     def approve(self) -> None:
-        self._show_reserved_orders()
+        orders = self._reserved_orders()
+        if not orders:
+            self._view.print_line("  접수 대기 중인 주문이 없습니다.")
+            return
+        self._view.print_table(
+            ["주문ID", "시료ID", "고객명", "수량", "주문일시"],
+            [[o.id, o.sample_id, o.customer_name, o.quantity, o.created_at[:19]]
+             for o in orders],
+        )
         order_id = self._view.prompt("승인할 주문 ID: ").strip()
         try:
             order = self._service.approve(order_id)
@@ -34,7 +42,15 @@ class OrderController:
             self._view.print_error(str(e))
 
     def reject(self) -> None:
-        self._show_reserved_orders()
+        orders = self._reserved_orders()
+        if not orders:
+            self._view.print_line("  접수 대기 중인 주문이 없습니다.")
+            return
+        self._view.print_table(
+            ["주문ID", "시료ID", "고객명", "수량", "주문일시"],
+            [[o.id, o.sample_id, o.customer_name, o.quantity, o.created_at[:19]]
+             for o in orders],
+        )
         order_id = self._view.prompt("거절할 주문 ID: ").strip()
         try:
             order = self._service.reject(order_id)
@@ -45,18 +61,8 @@ class OrderController:
     def list_all(self) -> None:
         self._show_order_groups()
 
-    def _show_reserved_orders(self) -> None:
-        orders = _sort_desc(
-            self._service.find_by_status(OrderStatus.RESERVED)
-        )
-        if not orders:
-            self._view.print_line("  접수 대기 중인 주문이 없습니다.")
-            return
-        self._view.print_table(
-            ["주문ID", "시료ID", "고객명", "수량", "주문일시"],
-            [[o.id, o.sample_id, o.customer_name, o.quantity, o.created_at[:19]]
-             for o in orders],
-        )
+    def _reserved_orders(self) -> list:
+        return _sort_desc(self._service.find_by_status(OrderStatus.RESERVED))
 
     def _show_order_groups(self) -> None:
         all_orders = self._service.find_all()

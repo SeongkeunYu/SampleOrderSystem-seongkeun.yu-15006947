@@ -38,21 +38,6 @@ def controller(sample_svc, order_svc, prod_svc):
     return MonitorController(monitor, ConsoleView())
 
 
-def test_show_dashboard_displays_sample_name(controller, sample_svc, capsys):
-    sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
-    controller.show_dashboard()
-    assert "GaN" in capsys.readouterr().out
-
-
-def test_show_dashboard_displays_timestamp(controller, capsys):
-    controller.show_dashboard()
-    assert "2026" in capsys.readouterr().out
-
-
-def test_show_dashboard_shows_empty_messages_when_no_data(controller, capsys):
-    controller.show_dashboard()
-    assert "없습니다" in capsys.readouterr().out
-
 
 def test_show_order_monitor_displays_order_info(controller, sample_svc, order_svc, capsys):
     sample = sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)

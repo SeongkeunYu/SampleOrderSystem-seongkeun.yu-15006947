@@ -18,7 +18,6 @@ class MonitorSnapshot:
     timestamp: str
     samples: list[Sample] = field(default_factory=list)
     orders_by_status: dict[str, list[Order]] = field(default_factory=dict)
-    production_queue: list[Order] = field(default_factory=list)
     production_progress: list[dict] = field(default_factory=list)
     stock_health: list[dict] = field(default_factory=list)
 
@@ -48,11 +47,6 @@ class Monitor:
             if order.status in _MONITORED_STATUSES:
                 orders_by_status.setdefault(order.status.value, []).append(order)
 
-        production_queue = sorted(
-            [o for o in orders if o.status == OrderStatus.PRODUCING],
-            key=lambda o: o.created_at,
-        )
-
         production_progress = self._prod_svc.get_production_progress()
         stock_health = _calc_stock_health(samples, orders_by_status)
 
@@ -60,7 +54,6 @@ class Monitor:
             timestamp          = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             samples            = samples,
             orders_by_status   = orders_by_status,
-            production_queue   = production_queue,
             production_progress= production_progress,
             stock_health       = stock_health,
         )

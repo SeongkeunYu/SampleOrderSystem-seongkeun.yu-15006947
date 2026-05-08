@@ -67,7 +67,13 @@ def test_approve_shows_producing_when_stock_insufficient(controller, order_svc, 
     assert "PRODUCING" in capsys.readouterr().out
 
 
-def test_approve_shows_error_on_invalid_order(controller, monkeypatch, capsys):
+def test_approve_shows_message_when_no_reserved_orders(controller, capsys):
+    controller.approve()
+    assert "없습니다" in capsys.readouterr().out
+
+
+def test_approve_shows_error_on_invalid_id(controller, order_svc, gan, monkeypatch, capsys):
+    order_svc.create(gan.id, "홍길동", 10)
     monkeypatch.setattr("builtins.input", lambda _: "NONE")
     controller.approve()
     assert "오류" in capsys.readouterr().out
@@ -80,7 +86,13 @@ def test_reject_shows_rejected_status(controller, order_svc, gan, monkeypatch, c
     assert "REJECTED" in capsys.readouterr().out
 
 
-def test_reject_shows_error_on_invalid_order(controller, monkeypatch, capsys):
+def test_reject_shows_message_when_no_reserved_orders(controller, capsys):
+    controller.reject()
+    assert "없습니다" in capsys.readouterr().out
+
+
+def test_reject_shows_error_on_invalid_id(controller, order_svc, gan, monkeypatch, capsys):
+    order_svc.create(gan.id, "홍길동", 10)
     monkeypatch.setattr("builtins.input", lambda _: "NONE")
     controller.reject()
     assert "오류" in capsys.readouterr().out

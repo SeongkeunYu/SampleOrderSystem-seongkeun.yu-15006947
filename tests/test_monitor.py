@@ -72,21 +72,11 @@ def test_snapshot_groups_orders_by_status(monitor, sample_svc, order_svc, gan):
     assert len(snapshot.orders_by_status["RESERVED"]) == 1
 
 
-def test_snapshot_production_queue_is_fifo_ordered(monitor, order_svc, gan):
-    o1 = order_svc.create(gan.id, "홍길동", 10)
-    o2 = order_svc.create(gan.id, "김철수", 10)
-    order_svc.approve(o1.id)
-    order_svc.approve(o2.id)
-    snapshot = monitor.get_snapshot()
-    assert snapshot.production_queue[0].id == o1.id
-    assert snapshot.production_queue[1].id == o2.id
-
-
 def test_snapshot_empty_when_no_data(monitor):
     snapshot = monitor.get_snapshot()
     assert snapshot.samples == []
     assert snapshot.orders_by_status == {}
-    assert snapshot.production_queue == []
+    assert snapshot.production_progress == []
     assert snapshot.total_stock == 0
 
 
