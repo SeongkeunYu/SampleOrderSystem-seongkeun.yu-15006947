@@ -33,3 +33,7 @@ Thumbs.db
 # Runtime data
 data/
 *.tmp
+
+# Test coverage
+.coverage
+htmlcov/
