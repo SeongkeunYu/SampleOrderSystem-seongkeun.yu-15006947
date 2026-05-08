@@ -11,13 +11,6 @@ class ProductionController:
         self._order_svc = order_service
         self._view = view
 
-    def complete_production(self) -> None:
-        try:
-            order = self._prod_svc.complete_production()
-            self._view.print_success(f"생산 완료: 주문 {order.id} → CONFIRMED")
-        except ValueError as e:
-            self._view.print_error(str(e))
-
     def release(self) -> None:
         self._show_confirmed_orders()
         order_id = self._view.prompt("출고할 주문 ID: ").strip()

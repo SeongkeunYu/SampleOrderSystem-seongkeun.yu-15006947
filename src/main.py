@@ -104,7 +104,6 @@ def _production_menu(ctrl: ProductionController, view: ConsoleView) -> None:
     while True:
         view.print_menu("생산라인 조회", [
             ("1", "생산 대기 목록 조회"),
-            ("2", "생산 완료 처리"),
             ("0", "뒤로"),
         ])
         choice = view.prompt(" 선택 > ").strip()
@@ -112,8 +111,6 @@ def _production_menu(ctrl: ProductionController, view: ConsoleView) -> None:
             break
         elif choice == "1":
             ctrl.list_queue()
-        elif choice == "2":
-            ctrl.complete_production()
         else:
             view.print_error("올바른 메뉴를 선택하세요.")
 

@@ -41,17 +41,6 @@ def gan(sample_svc):
     return sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
 
 
-def test_complete_production_shows_confirmed(controller, order_svc, gan, capsys):
-    order = order_svc.create(gan.id, "홍길동", 10)
-    order_svc.approve(order.id)
-    controller.complete_production()
-    assert "CONFIRMED" in capsys.readouterr().out
-
-
-def test_complete_production_shows_error_when_none_producing(controller, capsys):
-    controller.complete_production()
-    assert "오류" in capsys.readouterr().out
-
 
 def test_release_shows_release_status(controller, prod_svc, order_svc, gan, monkeypatch, capsys):
     order = order_svc.create(gan.id, "홍길동", 10)
