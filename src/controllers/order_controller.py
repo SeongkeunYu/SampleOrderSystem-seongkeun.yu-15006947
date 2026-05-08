@@ -1,3 +1,4 @@
+from src.models.order import OrderStatus
 from src.services.order_service import OrderService
 from src.views.console_view import ConsoleView
 
@@ -19,6 +20,7 @@ class OrderController:
             self._view.print_error(str(e))
 
     def approve(self) -> None:
+        self._show_reserved_orders()
         order_id = self._view.prompt("승인할 주문 ID: ").strip()
         try:
             order = self._service.approve(order_id)
@@ -27,6 +29,7 @@ class OrderController:
             self._view.print_error(str(e))
 
     def reject(self) -> None:
+        self._show_reserved_orders()
         order_id = self._view.prompt("거절할 주문 ID: ").strip()
         try:
             order = self._service.reject(order_id)
@@ -43,4 +46,19 @@ class OrderController:
             ["주문ID", "시료ID", "고객명", "수량", "상태", "주문일시"],
             [[o.id, o.sample_id, o.customer_name, o.quantity,
               o.status.value, o.created_at[:19]] for o in orders],
+        )
+
+    def _show_reserved_orders(self) -> None:
+        orders = sorted(
+            self._service.find_by_status(OrderStatus.RESERVED),
+            key=lambda o: o.created_at,
+            reverse=True,
+        )
+        if not orders:
+            self._view.print_line("접수된 주문이 없습니다.")
+            return
+        self._view.print_table(
+            ["주문ID", "시료ID", "고객명", "수량", "주문일시"],
+            [[o.id, o.sample_id, o.customer_name, o.quantity, o.created_at[:19]]
+             for o in orders],
         )
