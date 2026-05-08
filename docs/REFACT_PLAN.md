@@ -151,8 +151,8 @@ Item 1 → Item 2 → Item 3 → Item 4
 
 ## 완료 기준
 
-- [ ] Item 1: approve/reject 빈 목록 → 즉시 반환
-- [ ] Item 2: production_queue 필드 제거
-- [ ] Item 3: show_dashboard 제거
-- [ ] Item 4: FIFO 스케줄 헬퍼 추출
-- [ ] 전체 테스트 통과
+- [x] Item 1: approve/reject 빈 목록 → 즉시 반환
+- [x] Item 2: production_queue 필드 제거
+- [x] Item 3: show_dashboard 제거
+- [x] Item 4: FIFO 스케줄 헬퍼 추출
+- [x] 전체 테스트 통과 (103 passed)
