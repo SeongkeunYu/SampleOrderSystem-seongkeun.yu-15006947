@@ -7,22 +7,12 @@ _SEP     = "=" * 60
 _DIVIDER = "-" * 60
 
 _BANNER = r"""
-  ____                      _
- / ___|  __ _ _ __ ___  _ _| | ___
- \___ \ / _` | '_ ` _ \| '_ \/ _ \
-  ___) | (_| | | | | | | |_) | __/
- |____/ \__,_|_| |_| |_| .__/ \___|
-  ___          _        |_|
- / _ \ _ __ __| | ___ _ __
-| | | | '__/ _` |/ _ \ '__|
-| |_| | | | (_| |  __/ |
- \___/|_|  \__,_|\___|_|
-  ____            _
- / ___| _   _ ___| |_ ___ _ __ ___
- \___ \| | | / __| __/ _ \ '_ ` _ \
-  ___) | |_| \__ \ ||  __/ | | | | |
- |____/ \__, |___/\__\___|_| |_| |_|
-        |___/                       """
+ ____   ____    ___
+/ ___| / ___| / _ \
+\___ \ \___ \| | | |
+ ___) | ___) || |_| |
+|____/ |____/  \___/
+ SampleOrderSystem"""
 
 _STATUS_STYLES = {
     "RESERVED":  "yellow",
@@ -142,7 +132,8 @@ class ConsoleView:
     def print_main_page(self, sample_count: int, total_stock: int,
                         order_count: int, producing_count: int, now: str) -> None:
         self._con.print(_SEP, markup=False)
-        self._con.print(_BANNER, markup=False)
+        for line in _BANNER.strip().split("\n"):
+            self._con.print(line.center(60), markup=False)
         self._con.print(f"{'반도체 시료 생산주문관리 시스템':^60}", markup=False)
         self._con.print(_SEP, markup=False)
         self._con.print(f" 시스템 현황  {now}", markup=False)
