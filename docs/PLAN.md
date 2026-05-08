@@ -55,7 +55,7 @@ SampleOrderSystem/
 | :--- | :--- | :--- |
 | `id` | str | 시료 고유 ID |
 | `name` | str | 시료 이름 |
-| `avg_production_time` | float | 평균 생산시간 (시간 단위) |
+| `avg_production_time` | float | 평균 생산시간 (min/ea) |
 | `yield_rate` | float | 수율 (0.0 ~ 1.0) |
 | `stock` | int | 현재 재고 수량 |
 
