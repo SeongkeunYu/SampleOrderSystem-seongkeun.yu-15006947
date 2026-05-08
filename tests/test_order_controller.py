@@ -33,11 +33,11 @@ def controller(order_svc):
 
 @pytest.fixture
 def gan(sample_svc):
-    return sample_svc.register("S001", "GaN", 2.5, 0.9)
+    return sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
 
 
 def test_create_registers_order_as_reserved(controller, order_svc, gan, monkeypatch):
-    inputs = iter(["S001", "홍길동", "10"])
+    inputs = iter([gan.id, "홍길동", "10"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     controller.create()
     orders = order_svc.find_all()
@@ -53,15 +53,15 @@ def test_create_shows_error_on_unknown_sample(controller, monkeypatch, capsys):
 
 
 def test_approve_shows_confirmed_when_stock_sufficient(controller, sample_svc, order_svc, gan, monkeypatch, capsys):
-    sample_svc.add_stock("S001", 20)
-    order = order_svc.create("S001", "홍길동", 10)
+    sample_svc.add_stock(gan.id, 20)
+    order = order_svc.create(gan.id, "홍길동", 10)
     monkeypatch.setattr("builtins.input", lambda _: order.id)
     controller.approve()
     assert "CONFIRMED" in capsys.readouterr().out
 
 
 def test_approve_shows_producing_when_stock_insufficient(controller, order_svc, gan, monkeypatch, capsys):
-    order = order_svc.create("S001", "홍길동", 10)
+    order = order_svc.create(gan.id, "홍길동", 10)
     monkeypatch.setattr("builtins.input", lambda _: order.id)
     controller.approve()
     assert "PRODUCING" in capsys.readouterr().out
@@ -74,7 +74,7 @@ def test_approve_shows_error_on_invalid_order(controller, monkeypatch, capsys):
 
 
 def test_reject_shows_rejected_status(controller, order_svc, gan, monkeypatch, capsys):
-    order = order_svc.create("S001", "홍길동", 10)
+    order = order_svc.create(gan.id, "홍길동", 10)
     monkeypatch.setattr("builtins.input", lambda _: order.id)
     controller.reject()
     assert "REJECTED" in capsys.readouterr().out
@@ -87,7 +87,7 @@ def test_reject_shows_error_on_invalid_order(controller, monkeypatch, capsys):
 
 
 def test_list_all_displays_orders(controller, order_svc, gan, capsys):
-    order_svc.create("S001", "홍길동", 10)
+    order_svc.create(gan.id, "홍길동", 10)
     controller.list_all()
     assert "홍길동" in capsys.readouterr().out
 

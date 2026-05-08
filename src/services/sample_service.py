@@ -6,11 +6,14 @@ class SampleService:
     def __init__(self, sample_repo: SampleRepository):
         self._repo = sample_repo
 
-    def register(self, id: str, name: str, avg_production_time: float, yield_rate: float) -> Sample:
-        if self._repo.find_by_id(id) is not None:
-            raise ValueError(f"이미 존재하는 시료 ID: {id}")
-        sample = Sample(id=id, name=name, avg_production_time=avg_production_time,
-                        yield_rate=yield_rate, stock=0)
+    def register(self, name: str, avg_production_time: float, yield_rate: float) -> Sample:
+        sample = Sample(
+            id=self._next_id(),
+            name=name,
+            avg_production_time=avg_production_time,
+            yield_rate=yield_rate,
+            stock=0,
+        )
         self._repo.save(sample)
         return sample
 
@@ -31,3 +34,14 @@ class SampleService:
         sample.stock += quantity
         self._repo.save(sample)
         return sample
+
+    def _next_id(self) -> str:
+        nums = []
+        for s in self._repo.find_all():
+            parts = s.id.split("-")
+            if len(parts) == 2 and parts[0] == "S":
+                try:
+                    nums.append(int(parts[1]))
+                except ValueError:
+                    pass
+        return f"S-{(max(nums) + 1 if nums else 1):03d}"

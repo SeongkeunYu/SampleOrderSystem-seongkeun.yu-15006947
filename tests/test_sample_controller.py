@@ -16,23 +16,24 @@ def controller(service):
 
 
 def test_register_persists_sample_from_input(controller, service, monkeypatch):
-    inputs = iter(["S001", "GaN", "2.5", "0.9"])
+    inputs = iter(["GaN", "2.5", "0.9"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     controller.register()
-    assert service.find_by_id("S001").name == "GaN"
+    sample = service.find_all()[0]
+    assert sample.id == "S-001"
+    assert sample.name == "GaN"
 
 
-def test_register_shows_error_on_duplicate(controller, service, monkeypatch, capsys):
-    service.register("S001", "GaN", 2.5, 0.9)
-    inputs = iter(["S001", "SiC", "3.0", "0.85"])
+def test_register_shows_generated_id_in_success_message(controller, monkeypatch, capsys):
+    inputs = iter(["GaN", "2.5", "0.9"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     controller.register()
-    assert "오류" in capsys.readouterr().out
+    assert "S-001" in capsys.readouterr().out
 
 
 def test_list_all_displays_all_samples(controller, service, capsys):
-    service.register("S001", "GaN", 2.5, 0.9)
-    service.register("S002", "SiC", 3.0, 0.85)
+    service.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
+    service.register(name="SiC", avg_production_time=3.0, yield_rate=0.85)
     controller.list_all()
     output = capsys.readouterr().out
     assert "GaN" in output
@@ -45,8 +46,8 @@ def test_list_all_shows_empty_message_when_no_samples(controller, capsys):
 
 
 def test_search_displays_matching_sample(controller, service, monkeypatch, capsys):
-    service.register("S001", "GaN wafer", 2.5, 0.9)
-    service.register("S002", "SiC", 3.0, 0.85)
+    service.register(name="GaN wafer", avg_production_time=2.5, yield_rate=0.9)
+    service.register(name="SiC", avg_production_time=3.0, yield_rate=0.85)
     monkeypatch.setattr("builtins.input", lambda _: "GaN")
     controller.search()
     output = capsys.readouterr().out
@@ -55,7 +56,7 @@ def test_search_displays_matching_sample(controller, service, monkeypatch, capsy
 
 
 def test_search_shows_empty_message_when_no_match(controller, service, monkeypatch, capsys):
-    service.register("S001", "GaN", 2.5, 0.9)
+    service.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
     monkeypatch.setattr("builtins.input", lambda _: "SiC")
     controller.search()
     assert "없습니다" in capsys.readouterr().out

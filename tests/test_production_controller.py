@@ -38,11 +38,11 @@ def controller(prod_svc, order_svc):
 
 @pytest.fixture
 def gan(sample_svc):
-    return sample_svc.register("S001", "GaN", 2.5, 0.9)
+    return sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
 
 
 def test_complete_production_shows_confirmed(controller, order_svc, gan, capsys):
-    order = order_svc.create("S001", "홍길동", 10)
+    order = order_svc.create(gan.id, "홍길동", 10)
     order_svc.approve(order.id)
     controller.complete_production()
     assert "CONFIRMED" in capsys.readouterr().out
@@ -54,8 +54,8 @@ def test_complete_production_shows_error_when_none_producing(controller, capsys)
 
 
 def test_release_shows_release_status(controller, sample_svc, order_svc, gan, monkeypatch, capsys):
-    sample_svc.add_stock("S001", 20)
-    order = order_svc.create("S001", "홍길동", 10)
+    sample_svc.add_stock(gan.id, 20)
+    order = order_svc.create(gan.id, "홍길동", 10)
     order_svc.approve(order.id)
     monkeypatch.setattr("builtins.input", lambda _: order.id)
     controller.release()
@@ -69,7 +69,7 @@ def test_release_shows_error_on_invalid_order(controller, monkeypatch, capsys):
 
 
 def test_list_queue_shows_producing_orders(controller, order_svc, gan, capsys):
-    order = order_svc.create("S001", "홍길동", 10)
+    order = order_svc.create(gan.id, "홍길동", 10)
     order_svc.approve(order.id)
     controller.list_queue()
     assert "홍길동" in capsys.readouterr().out
