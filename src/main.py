@@ -149,15 +149,15 @@ def main():
             break
         elif choice == "1":
             _sample_menu(sample_ctrl, view)
-        elif choice == "2":                          # 시료 주문
+        elif choice == "2":
             order_ctrl.create()
-        elif choice == "3":                          # 주문 승인/거절
+        elif choice == "3":
             _approve_menu(order_ctrl, view)
-        elif choice == "4":                          # 모니터링 & 도구
+        elif choice == "4":
             _monitor_menu(monitor_ctrl, view)
-        elif choice == "5":                          # 생산라인 조회
+        elif choice == "5":
             _production_menu(prod_ctrl, view)
-        elif choice == "6":                          # 출고 처리
+        elif choice == "6":
             prod_ctrl.release()
         else:
             view.print_error("올바른 메뉴를 선택하세요.")

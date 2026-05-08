@@ -1,6 +1,5 @@
 from rich import box as rich_box
 from rich.console import Console
-from rich.rule import Rule
 from rich.table import Table
 
 _SEP     = "=" * 60
@@ -155,10 +154,3 @@ class ConsoleView:
         self._con.print()
         self._con.print(_DIVIDER, markup=False)
 
-    def print_summary(self, sample_count: int, total_stock: int,
-                      order_count: int, producing_count: int) -> None:
-        self.print_header("시스템 현황 요약")
-        self._con.print(f"  시료 종수      : [bold]{sample_count}[/bold]종")
-        self._con.print(f"  총 재고량      : [bold]{total_stock:,}[/bold]개")
-        self._con.print(f"  전체 주문 건수 : [bold]{order_count}[/bold]건")
-        self._con.print(f"  생산라인 대기  : [bold yellow]{producing_count}[/bold yellow]건")
