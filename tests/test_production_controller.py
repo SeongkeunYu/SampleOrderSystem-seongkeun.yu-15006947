@@ -53,10 +53,10 @@ def test_complete_production_shows_error_when_none_producing(controller, capsys)
     assert "오류" in capsys.readouterr().out
 
 
-def test_release_shows_release_status(controller, sample_svc, order_svc, gan, monkeypatch, capsys):
-    sample_svc.add_stock(gan.id, 20)
+def test_release_shows_release_status(controller, prod_svc, order_svc, gan, monkeypatch, capsys):
     order = order_svc.create(gan.id, "홍길동", 10)
-    order_svc.approve(order.id)
+    order_svc.approve(order.id)          # stock=0 → PRODUCING
+    prod_svc.complete_production()       # PRODUCING → CONFIRMED
     monkeypatch.setattr("builtins.input", lambda _: order.id)
     controller.release()
     assert "RELEASE" in capsys.readouterr().out

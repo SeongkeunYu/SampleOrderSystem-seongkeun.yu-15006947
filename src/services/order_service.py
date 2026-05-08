@@ -34,7 +34,7 @@ class OrderService:
         if sample.stock >= order.quantity:
             sample.stock -= order.quantity
             self._sample_repo.save(sample)
-            order.status = OrderStatus.CONFIRMED
+            order.status = OrderStatus.RELEASE   # 재고 충분 → 즉시 출고
         else:
             order.status = OrderStatus.PRODUCING
 
