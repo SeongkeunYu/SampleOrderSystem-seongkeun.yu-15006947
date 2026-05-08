@@ -75,6 +75,51 @@ class ConsoleView:
         print()
         print(_DIVIDER)
 
+    def print_monitor_dashboard(self, snapshot) -> None:
+        print(_SEP)
+        print(f" 모니터링 대시보드              [{snapshot.timestamp}]")
+        print(_SEP)
+
+        print()
+        print(" ── 시료 현황 " + "─" * 46)
+        if not snapshot.samples:
+            print("  등록된 시료가 없습니다.")
+        else:
+            self.print_table(
+                ["ID", "이름", "평균생산시간(min/ea)", "수율", "재고(ea)"],
+                [[s.id, s.name, s.avg_production_time, f"{s.yield_rate:.2f}", s.stock]
+                 for s in snapshot.samples],
+            )
+
+        print()
+        print(" ── 주문 현황 (상태별) " + "─" * 38)
+        if not snapshot.orders_by_status:
+            print("  등록된 주문이 없습니다.")
+        else:
+            for status_val in ["RESERVED", "PRODUCING", "CONFIRMED", "RELEASE", "REJECTED"]:
+                group = snapshot.orders_by_status.get(status_val, [])
+                if group:
+                    print(f"\n  [{status_val}]  {len(group)}건")
+                    self.print_table(
+                        ["주문ID", "시료ID", "고객명", "수량"],
+                        [[o.id[:8], o.sample_id, o.customer_name, o.quantity]
+                         for o in group],
+                    )
+
+        print()
+        print(" ── 생산 대기 큐 (FIFO 순서) " + "─" * 31)
+        if not snapshot.production_queue:
+            print("  생산 대기 중인 주문이 없습니다.")
+        else:
+            self.print_table(
+                ["순번", "주문ID", "시료ID", "고객명", "수량"],
+                [[i + 1, o.id[:8], o.sample_id, o.customer_name, o.quantity]
+                 for i, o in enumerate(snapshot.production_queue)],
+            )
+
+        print()
+        print(_DIVIDER)
+
     def print_summary(self, sample_count: int, total_stock: int,
                       order_count: int, producing_count: int) -> None:
         self.print_header("시스템 현황 요약")

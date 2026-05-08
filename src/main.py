@@ -5,9 +5,12 @@ from datetime import datetime
 sys.stdout.reconfigure(encoding="utf-8")
 sys.stdin.reconfigure(encoding="utf-8")
 
+from src.controllers.monitor_controller import MonitorController
 from src.controllers.order_controller import OrderController
 from src.controllers.production_controller import ProductionController
 from src.controllers.sample_controller import SampleController
+from tools.monitor import Monitor
+from tools.dummy_generator import DummyGenerator
 from src.models.order import OrderStatus
 from src.repositories.order_repository import OrderRepository
 from src.repositories.sample_repository import SampleRepository
@@ -27,11 +30,14 @@ def build_app(data_dir: str = DATA_DIR):
     order_svc   = OrderService(order_repo, sample_repo)
     prod_svc    = ProductionService(order_repo, sample_repo)
     view        = ConsoleView()
+    monitor     = Monitor(sample_svc, order_svc)
+    generator   = DummyGenerator(sample_svc, order_svc)
     return (
         sample_svc, order_svc, prod_svc,
         SampleController(sample_svc, view),
         OrderController(order_svc, view),
         ProductionController(prod_svc, order_svc, view),
+        MonitorController(monitor, generator, view),
         view,
     )
 
@@ -112,8 +118,27 @@ def _production_menu(ctrl: ProductionController, view: ConsoleView) -> None:
             view.print_error("올바른 메뉴를 선택하세요.")
 
 
+# ── [4] 모니터링 & 도구 ────────────────────────────────────────
+def _monitor_menu(ctrl: MonitorController, view: ConsoleView) -> None:
+    while True:
+        view.print_menu("모니터링 & 도구", [
+            ("1", "전체 현황 대시보드"),
+            ("2", "더미 데이터 생성"),
+            ("0", "뒤로"),
+        ])
+        choice = view.prompt(" 선택 > ").strip()
+        if choice == "0":
+            break
+        elif choice == "1":
+            ctrl.show_dashboard()
+        elif choice == "2":
+            ctrl.generate_dummy()
+        else:
+            view.print_error("올바른 메뉴를 선택하세요.")
+
+
 def main():
-    sample_svc, order_svc, _, sample_ctrl, order_ctrl, prod_ctrl, view = build_app()
+    sample_svc, order_svc, _, sample_ctrl, order_ctrl, prod_ctrl, monitor_ctrl, view = build_app()
 
     while True:
         _show_main_page(sample_svc, order_svc, view)
@@ -128,9 +153,8 @@ def main():
             order_ctrl.create()
         elif choice == "3":                          # 주문 승인/거절
             _approve_menu(order_ctrl, view)
-        elif choice == "4":                          # 모니터링 (Phase 4)
-            view.print_line("\n  [모니터링] Phase 4에서 구현됩니다.")
-            view.prompt("  엔터를 눌러 계속...")
+        elif choice == "4":                          # 모니터링 & 도구
+            _monitor_menu(monitor_ctrl, view)
         elif choice == "5":                          # 생산라인 조회
             _production_menu(prod_ctrl, view)
         elif choice == "6":                          # 출고 처리
