@@ -1,4 +1,8 @@
 import os
+import sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+sys.stdin.reconfigure(encoding="utf-8")
 
 from src.controllers.order_controller import OrderController
 from src.controllers.production_controller import ProductionController
