@@ -36,12 +36,8 @@ class ProductionController:
         )
 
     def list_queue(self) -> None:
-        orders = self._order_svc.find_by_status(OrderStatus.PRODUCING)
-        if not orders:
+        progress = self._prod_svc.get_production_progress()
+        if not progress:
             self._view.print_line("생산 중인 주문이 없습니다.")
             return
-        self._view.print_table(
-            ["주문ID", "시료ID", "고객명", "수량", "주문일시"],
-            [[o.id, o.sample_id, o.customer_name, o.quantity,
-              o.created_at[:19]] for o in orders],
-        )
+        self._view.print_production_queue(progress)

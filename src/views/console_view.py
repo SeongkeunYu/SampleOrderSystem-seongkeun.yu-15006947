@@ -142,6 +142,25 @@ class ConsoleView:
         self._con.print()
         self._con.print(_DIVIDER, markup=False)
 
+    def print_production_queue(self, progress: list[dict]) -> None:
+        t = Table(box=rich_box.SIMPLE, header_style="bold",
+                  highlight=False, show_edge=False)
+        for col in ["순번", "상태", "주문ID", "고객명", "시료", "수량",
+                    "생산수량", "진행률", "완료예정"]:
+            t.add_column(col)
+        for i, p in enumerate(progress):
+            o = p["order"]
+            status_text = "[bright_blue]진행중[/bright_blue]" \
+                if p["is_active"] else "[dim]대기중[/dim]"
+            t.add_row(
+                str(i + 1), status_text, o.id,
+                o.customer_name, p["sample_name"], str(o.quantity),
+                f"{p['prod_qty']}ea",
+                _progress_bar(p["progress_pct"]),
+                p["end_time"].strftime("%H:%M"),
+            )
+        self._con.print(t)
+
     def print_order_monitor(self, snapshot) -> None:
         self._con.print(_SEP, markup=False)
         self._con.print(f" [bold]주문량 현황[/bold]              [{snapshot.timestamp}]")
