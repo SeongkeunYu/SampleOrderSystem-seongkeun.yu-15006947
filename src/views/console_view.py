@@ -97,7 +97,7 @@ class ConsoleView:
         if not snapshot.orders_by_status:
             self._con.print("  등록된 주문이 없습니다.", markup=False)
         else:
-            for status_val in ["RESERVED", "PRODUCING", "CONFIRMED", "RELEASE", "REJECTED"]:
+            for status_val in ["RESERVED", "PRODUCING", "CONFIRMED", "RELEASE"]:
                 group = snapshot.orders_by_status.get(status_val, [])
                 if not group:
                     continue
@@ -136,6 +136,59 @@ class ConsoleView:
                     str(i + 1), status_text, o.id,
                     p["sample_name"], str(o.quantity),
                     f"{p['prod_qty']}ea", bar, end_str,
+                )
+            self._con.print(t)
+
+        self._con.print()
+        self._con.print(_DIVIDER, markup=False)
+
+    def print_order_monitor(self, snapshot) -> None:
+        self._con.print(_SEP, markup=False)
+        self._con.print(f" [bold]주문량 현황[/bold]              [{snapshot.timestamp}]")
+        self._con.print(_SEP, markup=False)
+
+        if not snapshot.orders_by_status:
+            self._con.print("\n  데이터가 존재하지 않습니다.", markup=False)
+        else:
+            for status_val in ["RESERVED", "PRODUCING", "CONFIRMED", "RELEASE"]:
+                group = snapshot.orders_by_status.get(status_val, [])
+                style = _STATUS_STYLES.get(status_val, "white")
+                self._con.print(
+                    f"\n  [{style}][bold][{status_val}][/bold][/]  {len(group)}건"
+                )
+                if group:
+                    t = Table(box=rich_box.SIMPLE, header_style="bold",
+                              highlight=False, show_edge=False)
+                    for col in ["주문ID", "시료ID", "고객명", "수량"]:
+                        t.add_column(col)
+                    for o in group:
+                        t.add_row(o.id, o.sample_id, o.customer_name, str(o.quantity))
+                    self._con.print(t)
+
+        self._con.print()
+        self._con.print(_DIVIDER, markup=False)
+
+    def print_stock_monitor(self, snapshot) -> None:
+        self._con.print(_SEP, markup=False)
+        self._con.print(f" [bold]재고량 현황[/bold]              [{snapshot.timestamp}]")
+        self._con.print(_SEP, markup=False)
+
+        if not snapshot.stock_health:
+            self._con.print("\n  데이터가 존재하지 않습니다.", markup=False)
+        else:
+            t = Table(box=rich_box.SIMPLE, header_style="bold",
+                      highlight=False, show_edge=False)
+            for col in ["ID", "이름", "재고(ea)", "수요(ea)", "잔여율", "상태"]:
+                t.add_column(col)
+            for h in snapshot.stock_health:
+                s      = h["sample"]
+                status = h["status"]
+                pct    = f"{h['remaining_pct']:.1f}%"
+                bar    = _progress_bar(h["remaining_pct"])
+                style  = {"여유": "bright_green", "부족": "yellow", "고갈": "bold red"}[status]
+                t.add_row(
+                    s.id, s.name, str(s.stock), str(h["demand"]),
+                    bar, f"[{style}]{status}[/]",
                 )
             self._con.print(t)
 

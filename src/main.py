@@ -119,16 +119,19 @@ def _production_menu(ctrl: ProductionController, view: ConsoleView) -> None:
 def _monitor_menu(ctrl: MonitorController, view: ConsoleView) -> None:
     while True:
         view.print_menu("모니터링 & 도구", [
-            ("1", "전체 현황 대시보드"),
-            ("2", "더미 데이터 생성"),
+            ("1", "주문량 확인"),
+            ("2", "재고량 확인"),
+            ("3", "더미 데이터 생성"),
             ("0", "뒤로"),
         ])
         choice = view.prompt(" 선택 > ").strip()
         if choice == "0":
             break
         elif choice == "1":
-            ctrl.show_dashboard()
+            ctrl.show_order_monitor()
         elif choice == "2":
+            ctrl.show_stock_monitor()
+        elif choice == "3":
             ctrl.generate_dummy()
         else:
             view.print_error("올바른 메뉴를 선택하세요.")

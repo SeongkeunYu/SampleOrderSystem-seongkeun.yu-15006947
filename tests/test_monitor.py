@@ -88,3 +88,45 @@ def test_snapshot_empty_when_no_data(monitor):
     assert snapshot.orders_by_status == {}
     assert snapshot.production_queue == []
     assert snapshot.total_stock == 0
+
+
+# --- REJECTED 제외 ---
+
+def test_snapshot_excludes_rejected_from_orders_by_status(monitor, sample_svc, order_svc, gan):
+    order = order_svc.create(gan.id, "홍길동", 10)
+    order_svc.reject(order.id)
+    snapshot = monitor.get_snapshot()
+    assert "REJECTED" not in snapshot.orders_by_status
+
+
+# --- 재고 상태 판정 (stock_health) ---
+
+def test_stock_health_gal_when_stock_is_zero(monitor, gan):
+    snapshot = monitor.get_snapshot()
+    entry = next(h for h in snapshot.stock_health if h["sample"].id == gan.id)
+    assert entry["status"] == "고갈"
+    assert entry["remaining_pct"] == 0.0
+
+
+def test_stock_health_bujok_when_stock_less_than_demand(monitor, sample_svc, order_svc, gan):
+    sample_svc.add_stock(gan.id, 5)
+    order_svc.create(gan.id, "홍길동", 10)   # demand 10 > stock 5
+    snapshot = monitor.get_snapshot()
+    entry = next(h for h in snapshot.stock_health if h["sample"].id == gan.id)
+    assert entry["status"] == "부족"
+    assert 0.0 < entry["remaining_pct"] < 100.0
+
+
+def test_stock_health_yeoyoo_when_stock_sufficient(monitor, sample_svc, order_svc, gan):
+    sample_svc.add_stock(gan.id, 20)
+    order_svc.create(gan.id, "홍길동", 10)   # demand 10 <= stock 20
+    snapshot = monitor.get_snapshot()
+    entry = next(h for h in snapshot.stock_health if h["sample"].id == gan.id)
+    assert entry["status"] == "여유"
+
+
+def test_stock_health_remaining_pct_100_when_no_demand(monitor, sample_svc, gan):
+    sample_svc.add_stock(gan.id, 50)
+    snapshot = monitor.get_snapshot()
+    entry = next(h for h in snapshot.stock_health if h["sample"].id == gan.id)
+    assert entry["remaining_pct"] == 100.0

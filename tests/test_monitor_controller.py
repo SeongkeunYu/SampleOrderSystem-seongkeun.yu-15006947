@@ -81,3 +81,23 @@ def test_generate_dummy_shows_error_when_no_samples_for_orders(
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     controller.generate_dummy()
     assert "오류" in capsys.readouterr().out
+
+
+def test_show_order_monitor_displays_order_info(controller, sample_svc, order_svc, capsys):
+    sample = sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
+    order_svc.create(sample.id, "홍길동", 10)
+    controller.show_order_monitor()
+    assert "홍길동" in capsys.readouterr().out
+
+
+def test_show_stock_monitor_displays_sample_info(controller, sample_svc, capsys):
+    sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
+    controller.show_stock_monitor()
+    assert "GaN" in capsys.readouterr().out
+
+
+def test_show_stock_monitor_displays_stock_status(controller, sample_svc, capsys):
+    sample_svc.register(name="GaN", avg_production_time=2.5, yield_rate=0.9)
+    controller.show_stock_monitor()
+    out = capsys.readouterr().out
+    assert any(s in out for s in ["여유", "부족", "고갈"])
