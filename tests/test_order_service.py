@@ -123,3 +123,25 @@ def test_reject_raises_if_order_not_reserved(service, sample_service, gan):
 def test_reject_raises_if_order_not_found(service):
     with pytest.raises(ValueError, match="존재하지 않는 주문"):
         service.reject("NONE")
+
+
+# --- 조회 ---
+
+def test_find_all_returns_all_orders(service, gan):
+    service.create(sample_id="S001", customer_name="홍길동", quantity=10)
+    service.create(sample_id="S001", customer_name="김철수", quantity=5)
+    assert len(service.find_all()) == 2
+
+
+def test_find_all_returns_empty_when_no_orders(service):
+    assert service.find_all() == []
+
+
+def test_find_by_status_filters_correctly(service, sample_service, gan):
+    sample_service.add_stock("S001", 20)
+    o1 = service.create(sample_id="S001", customer_name="홍길동", quantity=10)
+    o2 = service.create(sample_id="S001", customer_name="김철수", quantity=5)
+    service.approve(o1.id)
+    reserved = service.find_by_status(OrderStatus.RESERVED)
+    assert len(reserved) == 1
+    assert reserved[0].id == o2.id

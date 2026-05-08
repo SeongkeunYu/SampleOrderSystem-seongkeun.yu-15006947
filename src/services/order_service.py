@@ -49,6 +49,12 @@ class OrderService:
         self._order_repo.save(order)
         return order
 
+    def find_all(self) -> list[Order]:
+        return self._order_repo.find_all()
+
+    def find_by_status(self, status: OrderStatus) -> list[Order]:
+        return self._order_repo.find_by_status(status)
+
     def _get_order(self, order_id: str) -> Order:
         order = self._order_repo.find_by_id(order_id)
         if order is None:
