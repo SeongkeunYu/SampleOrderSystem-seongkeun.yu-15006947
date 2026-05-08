@@ -64,11 +64,11 @@ def test_snapshot_groups_orders_by_status(monitor, sample_svc, order_svc, gan):
     sample_svc.add_stock(gan.id, 20)
     o1 = order_svc.create(gan.id, "홍길동", 5)
     o2 = order_svc.create(gan.id, "김철수", 5)
-    order_svc.approve(o1.id)  # 재고 충분 → RELEASE
+    order_svc.approve(o1.id)  # 재고 충분 → CONFIRMED
     snapshot = monitor.get_snapshot()
-    assert "RELEASE" in snapshot.orders_by_status
+    assert "CONFIRMED" in snapshot.orders_by_status
     assert "RESERVED" in snapshot.orders_by_status
-    assert len(snapshot.orders_by_status["RELEASE"]) == 1
+    assert len(snapshot.orders_by_status["CONFIRMED"]) == 1
     assert len(snapshot.orders_by_status["RESERVED"]) == 1
 
 

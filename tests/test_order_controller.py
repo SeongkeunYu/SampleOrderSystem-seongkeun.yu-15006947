@@ -52,12 +52,12 @@ def test_create_shows_error_on_unknown_sample(controller, monkeypatch, capsys):
     assert "오류" in capsys.readouterr().out
 
 
-def test_approve_shows_release_when_stock_sufficient(controller, sample_svc, order_svc, gan, monkeypatch, capsys):
+def test_approve_shows_confirmed_when_stock_sufficient(controller, sample_svc, order_svc, gan, monkeypatch, capsys):
     sample_svc.add_stock(gan.id, 20)
     order = order_svc.create(gan.id, "홍길동", 10)
     monkeypatch.setattr("builtins.input", lambda _: order.id)
     controller.approve()
-    assert "RELEASE" in capsys.readouterr().out
+    assert "CONFIRMED" in capsys.readouterr().out
 
 
 def test_approve_shows_producing_when_stock_insufficient(controller, order_svc, gan, monkeypatch, capsys):

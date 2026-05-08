@@ -91,9 +91,9 @@ def test_complete_production_raises_if_no_producing_orders(production_service):
 def test_release_sets_confirmed_order_to_release(
     order_service, production_service, sample_service, gan
 ):
+    sample_service.add_stock(gan.id, 20)
     order = order_service.create(gan.id, "홍길동", 10)
-    order_service.approve(order.id)          # stock=0 → PRODUCING
-    production_service.complete_production() # PRODUCING → CONFIRMED
+    order_service.approve(order.id)  # 재고 충분 → CONFIRMED
 
     released = production_service.release(order.id)
 

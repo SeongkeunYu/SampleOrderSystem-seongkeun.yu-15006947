@@ -42,10 +42,10 @@ def gan(sample_svc):
 
 
 
-def test_release_shows_release_status(controller, prod_svc, order_svc, gan, monkeypatch, capsys):
+def test_release_shows_release_status(controller, sample_svc, order_svc, gan, monkeypatch, capsys):
+    sample_svc.add_stock(gan.id, 20)
     order = order_svc.create(gan.id, "홍길동", 10)
-    order_svc.approve(order.id)          # stock=0 → PRODUCING
-    prod_svc.complete_production()       # PRODUCING → CONFIRMED
+    order_svc.approve(order.id)  # 재고 충분 → CONFIRMED
     monkeypatch.setattr("builtins.input", lambda _: order.id)
     controller.release()
     assert "RELEASE" in capsys.readouterr().out

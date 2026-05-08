@@ -53,11 +53,11 @@ def test_create_raises_if_sample_not_found(service):
 
 # --- 승인: 재고 충분 ---
 
-def test_approve_sets_release_when_stock_sufficient(service, sample_service, gan):
+def test_approve_sets_confirmed_when_stock_sufficient(service, sample_service, gan):
     sample_service.add_stock(gan.id, 20)
     order = service.create(sample_id=gan.id, customer_name="홍길동", quantity=10)
     approved = service.approve(order.id)
-    assert approved.status == OrderStatus.RELEASE
+    assert approved.status == OrderStatus.CONFIRMED
 
 
 def test_approve_deducts_stock_when_sufficient(service, sample_service, gan):
