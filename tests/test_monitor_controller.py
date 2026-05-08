@@ -2,6 +2,7 @@ import pytest
 from src.repositories.order_repository import OrderRepository
 from src.repositories.sample_repository import SampleRepository
 from src.services.order_service import OrderService
+from src.services.production_service import ProductionService
 from src.services.sample_service import SampleService
 from src.views.console_view import ConsoleView
 from src.controllers.monitor_controller import MonitorController
@@ -28,8 +29,13 @@ def order_svc(repos):
 
 
 @pytest.fixture
-def controller(sample_svc, order_svc):
-    monitor   = Monitor(sample_svc, order_svc)
+def prod_svc(repos):
+    return ProductionService(repos[1], repos[0])
+
+
+@pytest.fixture
+def controller(sample_svc, order_svc, prod_svc):
+    monitor   = Monitor(sample_svc, order_svc, prod_svc)
     generator = DummyGenerator(sample_svc, order_svc)
     return MonitorController(monitor, generator, ConsoleView())
 

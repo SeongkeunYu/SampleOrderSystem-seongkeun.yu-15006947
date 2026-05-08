@@ -13,6 +13,11 @@ _BANNER = r"""
 |____/ |____/  \___/
  SampleOrderSystem"""
 
+def _progress_bar(pct: float, width: int = 10) -> str:
+    filled = int(width * pct / 100)
+    return "█" * filled + "░" * (width - filled) + f" {pct:.1f}%"
+
+
 _STATUS_STYLES = {
     "RESERVED":  "yellow",
     "PRODUCING": "bright_blue",
@@ -108,21 +113,30 @@ class ConsoleView:
                     t.add_row(o.id, o.sample_id, o.customer_name, str(o.quantity))
                 self._con.print(t)
 
-        # ── 생산 대기 큐 ──────────────────────────────────────
+        # ── 생산 현황 (시간 기반) ────────────────────────────────
         self._con.print()
-        self._con.rule("[bold]생산 대기 큐 (FIFO 순서)[/bold]")
-        if not snapshot.production_queue:
+        self._con.rule("[bold]생산 현황[/bold]")
+        if not snapshot.production_progress:
             self._con.print("  생산 대기 중인 주문이 없습니다.", markup=False)
         else:
             t = Table(
                 box=rich_box.SIMPLE, header_style="bold",
                 highlight=False, show_edge=False,
             )
-            for col in ["순번", "주문ID", "시료ID", "고객명", "수량"]:
+            for col in ["순번", "상태", "주문ID", "시료", "수량",
+                        "생산수량", "진행률", "완료예정"]:
                 t.add_column(col)
-            for i, o in enumerate(snapshot.production_queue):
-                t.add_row(str(i + 1), o.id, o.sample_id,
-                          o.customer_name, str(o.quantity))
+            for i, p in enumerate(snapshot.production_progress):
+                o = p["order"]
+                status_text = "[bright_blue]진행중[/bright_blue]" \
+                    if p["is_active"] else "[dim]대기중[/dim]"
+                bar = _progress_bar(p["progress_pct"])
+                end_str = p["end_time"].strftime("%H:%M")
+                t.add_row(
+                    str(i + 1), status_text, o.id,
+                    p["sample_name"], str(o.quantity),
+                    f"{p['prod_qty']}ea", bar, end_str,
+                )
             self._con.print(t)
 
         self._con.print()

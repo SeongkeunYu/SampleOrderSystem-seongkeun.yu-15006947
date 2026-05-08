@@ -30,7 +30,7 @@ def build_app(data_dir: str = DATA_DIR):
     order_svc   = OrderService(order_repo, sample_repo)
     prod_svc    = ProductionService(order_repo, sample_repo)
     view        = ConsoleView()
-    monitor     = Monitor(sample_svc, order_svc)
+    monitor     = Monitor(sample_svc, order_svc, prod_svc)
     generator   = DummyGenerator(sample_svc, order_svc)
     return (
         sample_svc, order_svc, prod_svc,
@@ -104,7 +104,7 @@ def _production_menu(ctrl: ProductionController, view: ConsoleView) -> None:
     while True:
         view.print_menu("생산라인 조회", [
             ("1", "생산 대기 목록 조회"),
-            ("2", "생산 완료 처리 (FIFO)"),
+            ("2", "생산 완료 처리"),
             ("0", "뒤로"),
         ])
         choice = view.prompt(" 선택 > ").strip()
@@ -138,9 +138,13 @@ def _monitor_menu(ctrl: MonitorController, view: ConsoleView) -> None:
 
 
 def main():
-    sample_svc, order_svc, _, sample_ctrl, order_ctrl, prod_ctrl, monitor_ctrl, view = build_app()
+    sample_svc, order_svc, prod_svc, sample_ctrl, order_ctrl, prod_ctrl, monitor_ctrl, view = build_app()
 
     while True:
+        completed = prod_svc.auto_complete_productions()
+        for order in completed:
+            view.print_success(f"[자동 생산 완료] 주문 {order.id} → CONFIRMED")
+
         _show_main_page(sample_svc, order_svc, view)
         choice = view.prompt(" 선택 > ").strip()
 
