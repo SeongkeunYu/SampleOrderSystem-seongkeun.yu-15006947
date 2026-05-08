@@ -7,7 +7,6 @@ from src.services.sample_service import SampleService
 from src.views.console_view import ConsoleView
 from src.controllers.monitor_controller import MonitorController
 from tools.monitor import Monitor
-from tools.dummy_generator import DummyGenerator
 
 
 @pytest.fixture
@@ -35,9 +34,8 @@ def prod_svc(repos):
 
 @pytest.fixture
 def controller(sample_svc, order_svc, prod_svc):
-    monitor   = Monitor(sample_svc, order_svc, prod_svc)
-    generator = DummyGenerator(sample_svc, order_svc)
-    return MonitorController(monitor, generator, ConsoleView())
+    monitor = Monitor(sample_svc, order_svc, prod_svc)
+    return MonitorController(monitor, ConsoleView())
 
 
 def test_show_dashboard_displays_sample_name(controller, sample_svc, capsys):
@@ -53,34 +51,7 @@ def test_show_dashboard_displays_timestamp(controller, capsys):
 
 def test_show_dashboard_shows_empty_messages_when_no_data(controller, capsys):
     controller.show_dashboard()
-    out = capsys.readouterr().out
-    assert "없습니다" in out
-
-
-def test_generate_dummy_creates_samples_and_orders(
-    controller, sample_svc, order_svc, monkeypatch
-):
-    inputs = iter(["3", "5"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
-    controller.generate_dummy()
-    assert len(sample_svc.find_all()) == 3
-    assert len(order_svc.find_all()) == 5
-
-
-def test_generate_dummy_shows_success_message(controller, monkeypatch, capsys):
-    inputs = iter(["2", "3"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
-    controller.generate_dummy()
-    assert "생성" in capsys.readouterr().out
-
-
-def test_generate_dummy_shows_error_when_no_samples_for_orders(
-    controller, monkeypatch, capsys
-):
-    inputs = iter(["0", "3"])
-    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
-    controller.generate_dummy()
-    assert "오류" in capsys.readouterr().out
+    assert "없습니다" in capsys.readouterr().out
 
 
 def test_show_order_monitor_displays_order_info(controller, sample_svc, order_svc, capsys):

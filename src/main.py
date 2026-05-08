@@ -10,7 +10,6 @@ from src.controllers.order_controller import OrderController
 from src.controllers.production_controller import ProductionController
 from src.controllers.sample_controller import SampleController
 from tools.monitor import Monitor
-from tools.dummy_generator import DummyGenerator
 from src.models.order import OrderStatus
 from src.repositories.order_repository import OrderRepository
 from src.repositories.sample_repository import SampleRepository
@@ -30,14 +29,13 @@ def build_app(data_dir: str = DATA_DIR):
     order_svc   = OrderService(order_repo, sample_repo)
     prod_svc    = ProductionService(order_repo, sample_repo)
     view        = ConsoleView()
-    monitor     = Monitor(sample_svc, order_svc, prod_svc)
-    generator   = DummyGenerator(sample_svc, order_svc)
+    monitor = Monitor(sample_svc, order_svc, prod_svc)
     return (
         sample_svc, order_svc, prod_svc,
         SampleController(sample_svc, view),
         OrderController(order_svc, view),
         ProductionController(prod_svc, order_svc, view),
-        MonitorController(monitor, generator, view),
+        MonitorController(monitor, view),
         view,
     )
 
@@ -118,10 +116,9 @@ def _production_menu(ctrl: ProductionController, view: ConsoleView) -> None:
 # ── [4] 모니터링 & 도구 ────────────────────────────────────────
 def _monitor_menu(ctrl: MonitorController, view: ConsoleView) -> None:
     while True:
-        view.print_menu("모니터링 & 도구", [
+        view.print_menu("모니터링", [
             ("1", "주문량 확인"),
             ("2", "재고량 확인"),
-            ("3", "더미 데이터 생성"),
             ("0", "뒤로"),
         ])
         choice = view.prompt(" 선택 > ").strip()
@@ -131,8 +128,6 @@ def _monitor_menu(ctrl: MonitorController, view: ConsoleView) -> None:
             ctrl.show_order_monitor()
         elif choice == "2":
             ctrl.show_stock_monitor()
-        elif choice == "3":
-            ctrl.generate_dummy()
         else:
             view.print_error("올바른 메뉴를 선택하세요.")
 
